@@ -4,15 +4,21 @@ use ark_circom::zkp::{
     init_bn254_circom_from_bytes, init_bn254_params_from_bytes, proof_to_abi_bytes,
     prove_bn254, verify_bn254
 };
-use input::{decode_prove_inputs, decode_prove_publics, decode_prove_inputs_65};
+use input::{decode_prove_inputs, decode_prove_publics};
 
+#[cfg(not(feature = "sha25665"))]
 const WASM_BYTES: &[u8] = include_bytes!("../../../materials/sha256.wasm");
+#[cfg(not(feature = "sha25665"))]
 const R1CS_BYTES: &[u8] = include_bytes!("../../../materials/sha256.r1cs");
+#[cfg(not(feature = "sha25665"))]
 const ZKEY_BYTES: &[u8] = include_bytes!("../../../materials/sha256.zkey");
 
-const WASM65_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.wasm");
-const R1CS65_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.r1cs");
-const ZKEY65_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.zkey");
+#[cfg(feature = "sha25665")]
+const WASM_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.wasm");
+#[cfg(feature = "sha25665")]
+const R1CS_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.r1cs");
+#[cfg(feature = "sha25665")]
+const ZKEY_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.zkey");
 
 /// INPUT=http://localhost:9098/tasks/1 cargo run --release
 #[tokio::main]
@@ -50,7 +56,12 @@ async fn main() {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::input::decode_prove_inputs_65;
     use std::time::Instant;
+
+    const WASM65_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.wasm");
+    const R1CS65_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.r1cs");
+    const ZKEY65_BYTES: &[u8] = include_bytes!("../../../materials/sha256_65.zkey");
 
     #[tokio::test]
     async fn test_hash() {

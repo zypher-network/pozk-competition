@@ -24,7 +24,7 @@ pub fn encode_prove_inputs(inputs: &KeccakInput) -> String {
 
 pub fn decode_prove_publics(bytes: &[u8]) -> Result<Vec<Fr>, anyhow::Error> {
     let mut output = vec![];
-    for byte in bytes {
+    for byte in &bytes[0..4] {
         for i in 0..8 {
             output.push(Fr::from(byte >> (7 - i) & 1));
         }
@@ -33,6 +33,8 @@ pub fn decode_prove_publics(bytes: &[u8]) -> Result<Vec<Fr>, anyhow::Error> {
     Ok(output)
 }
 
+
+#[cfg(not(feature = "sha25665"))]
 pub fn decode_prove_inputs(bytes: &[u8]) -> Result<Input, anyhow::Error> {
     let mut input_tokens = decode(
         &[ParamType::FixedBytes(32)],
@@ -51,6 +53,12 @@ pub fn decode_prove_inputs(bytes: &[u8]) -> Result<Input, anyhow::Error> {
     maps.insert("in".to_owned(), input);
 
     Ok(Input { maps })
+}
+
+
+#[cfg(feature = "sha25665")]
+pub fn decode_prove_inputs(bytes: &[u8]) -> Result<Input, anyhow::Error> {
+    decode_prove_inputs_65(bytes)
 }
 
 pub fn decode_prove_inputs_65(bytes: &[u8]) -> Result<Input, anyhow::Error> {
