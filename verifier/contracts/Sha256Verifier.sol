@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/introspection/ERC165.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 
+import "./ITask.sol";
 import "./IVerifier.sol";
 
 contract Sha256Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifier {
@@ -136,12 +137,18 @@ contract Sha256Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifier 
 
     uint16 constant pLastMem = 896;
 
+    address public task;
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
         return interfaceId == type(IVerifier).interfaceId || super.supportsInterface(interfaceId);
     }
 
     function name() external pure returns (string memory) {
         return "Competition-1";
+    }
+
+    function permission() external pure returns (bool) {
+        return true;
     }
 
     /// show how to serialize/deseriaze the inputs params
@@ -154,6 +161,19 @@ contract Sha256Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifier 
     /// e.g. "uint256,bytes32,string,bytes32[],address[],ipfs"
     function publics() external pure returns (string memory) {
         return "bytes32";
+    }
+
+    function initialize(address _task) public initializer {
+        __Ownable_init(msg.sender);
+        task = _task;
+    }
+
+    function setTask(address _task) external onlyOwner {
+        task = _task;
+    }
+
+    function create(bytes calldata inputs, bytes calldata publics) external onlyOwner {
+        ITask(task).create(address(this), owner(), 0, inputs, publics);
     }
 
     struct Proof {
