@@ -56,6 +56,9 @@ contract ZKVMVerifier is Initializable, OwnableUpgradeable, ERC165, IVerifier {
 
     address public task;
 
+    /// admin list for register account
+    mapping(address => bool) public allowlist;
+
     function supportsInterface(bytes4 interfaceId) public view virtual override(ERC165) returns (bool) {
         return interfaceId == type(IVerifier).interfaceId || super.supportsInterface(interfaceId);
     }
@@ -89,7 +92,12 @@ contract ZKVMVerifier is Initializable, OwnableUpgradeable, ERC165, IVerifier {
         task = _task;
     }
 
-    function create(bytes calldata inputs, bytes calldata publics) external onlyOwner {
+    function allow(address account, bool _allow) external onlyOwner {
+        allowlist[account] = _allow;
+    }
+
+    function create(bytes calldata inputs, bytes calldata publics) external {
+        require(allowlist[msg.sender], "P");
         ITask(task).create(address(this), owner(), 0, inputs, publics);
     }
 

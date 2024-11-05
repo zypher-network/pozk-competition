@@ -8,6 +8,8 @@ const { ethers, upgrades, network } = require("hardhat");
 const { attachContract, sleep } = require("./address_utils.js");
 const { writeFile } = require('fs');
 
+const TASK_ADDRESS = "0xcc8240470F63D0b8055bf03f44D8817dAfCa0DB7";
+
 async function deployContractWithProxy(name, params=[]) {
   const Factory = await ethers.getContractFactory(name);
   //  use upgradeable deploy, then contracts can be upgraded success, otherwise will get error about ERC 1967 proxy
@@ -20,7 +22,9 @@ async function deployContractWithProxy(name, params=[]) {
 }
 
 async function deploy() {
-  const shuffle = await deployContractWithProxy("Game2048Step60CircomVerifier", []);
+  await deployContractWithProxy("Sha256Verifier", [TASK_ADDRESS]);
+  await deployContractWithProxy("Sha25665Verifier", [TASK_ADDRESS]);
+  // await deployContractWithProxy("ZKVMVerifier", [TASK_ADDRESS]);
 }
 
 async function main() {

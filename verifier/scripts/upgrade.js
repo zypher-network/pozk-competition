@@ -8,20 +8,40 @@ const { ethers, upgrades, network } = require("hardhat");
 const { attachContract, sleep } = require("./address_utils.js");
 const { writeFile } = require('fs');
 
-const NAME = "Game2048Step60CircomVerifier";
-const ADDR = "0xd64b51e6f5db063c9532bfc5f9f3472265771827";
+const NAME1 = "Sha256Verifier";
+const NAME2 = "Sha25665Verifier";
+const NAME3 = "ZKVMVerifier";
 
-async function upgrade() {
-  const C = await ethers.getContractFactory(NAME);
-  const address = await C.attach(ADDR);
-  const Factory = await ethers.getContractFactory(NAME);
-  console.log(`${NAME} upgrading...`);
+const ADDR1 = "0xb216af68a82538ff12edc8ac9eec3e91eaa54e9e";
+const ADDR2 = "0x614e0cccba48c2bb4da3f05704874f80e3a551d5";
+const ADDR3 = "";
+
+// wallet: 0x5ef51c9f449db7be2f0c636c6c137e65b8b96b9b
+const AA = "0x4e3111334ba387ddf000966cde24db35245fdc59";
+
+async function upgrade(name, addr) {
+  const C = await ethers.getContractFactory(name);
+  const address = await C.attach(addr);
+  const Factory = await ethers.getContractFactory(name);
+  console.log(`${name} upgrading...`);
   await upgrades.upgradeProxy(address, Factory);
-  console.log(`${NAME} upgraded`);
+  console.log(`${name} upgraded`);
+}
+
+async function setAllow(name, addr, account) {
+  const C = await ethers.getContractFactory(name);
+  const c = await C.attach(addr);
+  // await c.allow(account, true);
+  const res = await c.allowlist(account);
+  console.log(`${name} ${account} allowed: ${res}`);
 }
 
 async function main() {
-  await upgrade();
+  // await upgrade(NAME1, ADDR1);
+
+  await setAllow(NAME1, ADDR1, AA);
+  // await setAllow(NAME2, ADDR2, AA);
+  // await setAllow(NAME3, ADDR3, AA);
 }
 
 // We recommend this pattern to be able to use async/await everywhere

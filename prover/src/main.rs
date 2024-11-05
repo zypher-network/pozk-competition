@@ -65,7 +65,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_hash() {
-        // inputs & publics are same
+        // inputs & publics
         let i_bytes = hex::decode("3a985da74fe225b2045c172d6bd390bd855f086e3e9d525b46bfe24511431532").unwrap();
         let p_bytes = hex::decode("67b4edc746045b464a7953820100a60625e3e880dfdb2676a528abc4f475ed78").unwrap();
         let p65_bytes = hex::decode("be301418065404790d2453313b6679a2b3a3901598fbcdcc9813754a4e00e485").unwrap();
@@ -82,6 +82,9 @@ mod tests {
         let (_pi, proof) = prove_bn254(&params, circom, inputs).unwrap();
         assert!(verify_bn254(&params.vk, &publics, &proof).unwrap());
 
+        let bytes = proof_to_abi_bytes(&proof).unwrap();
+        println!("proof: 0x{}", hex::encode(&bytes));
+
         println!("time: {} s", now.elapsed().as_millis() as f32 / 1000f32);
 
         let now = Instant::now();
@@ -90,6 +93,9 @@ mod tests {
         let circom = init_bn254_circom_from_bytes(WASM65_BYTES, R1CS65_BYTES).unwrap();
         let (_pi, proof) = prove_bn254(&params, circom, inputs65).unwrap();
         assert!(verify_bn254(&params.vk, &publics65, &proof).unwrap());
+
+        let bytes = proof_to_abi_bytes(&proof).unwrap();
+        println!("proof: 0x{}", hex::encode(&bytes));
 
         println!("time: {} s", now.elapsed().as_millis() as f32 / 1000f32);
     }
