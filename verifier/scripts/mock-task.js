@@ -28,13 +28,13 @@ async function testVerify() {
   );
   console.log(`Verify 2: ${res2}`);
 
-  // const C3 = await ethers.getContractFactory("ZKVMVerifier");
-  // const c3 = await C3.attach(ADDR3);
-  // const res3 = await c3.verify(
-  //   "",
-  //   ""
-  // );
-  // console.log(`Verify 3: ${res3}`);
+  const C3 = await ethers.getContractFactory("ZKVMVerifier");
+  const c3 = await C3.attach(ADDR3);
+  const res3 = await c3.verify(
+    "0xfd46451a036048a3c20255db6d0a8af6bc6356c060a7600ed25449f18b52d668",
+    "0x50bd17691221a4cdca249c64642bcfaf24879c7fcf26b7395e7b239c85a7f4f77f1f396c1bc4a7fcdf6338443af4de1daf45f7ec465c5d86f61bf08a5c92278cc37100b500503c1b4e793bf8be0b9d4aa5842ce09fadeef968b91746c6c246f403bbd04602b3a8cfff38455396e8d6dc6ce1db4883c6dbd8450497029f966ebf170b4576259f5796be1440ace5013821e612a1616e593d81fd746b52984fe7e9520d39880723c3014049cefea02a3a190d0e22d15f9a4695d26d9c973fc60adb56c998e02293422bcbde3628a90cdeef941d9f8a6712fe7fb9c7b0ce810f4cdcfcf1709f2b2534f696fe4543fe288587bb89acebfef9cd010e21254f5cc7ae2e85e77b0e"
+  );
+  console.log(`Verify 3: ${res3}`);
 }
 
 async function main() {

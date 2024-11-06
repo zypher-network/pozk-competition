@@ -21,10 +21,21 @@ async function deployContractWithProxy(name, params=[]) {
   return address;
 }
 
+async function deployContract(name, params=[]) {
+  const Factory = await ethers.getContractFactory(name);
+  const contract = await Factory.deploy(...params);
+  const address = await contract.getAddress();
+  console.log(`${name} address: ${address}`);
+
+  return address;
+}
+
 async function deploy() {
   await deployContractWithProxy("Sha256Verifier", [TASK_ADDRESS]);
   await deployContractWithProxy("Sha25665Verifier", [TASK_ADDRESS]);
-  // await deployContractWithProxy("ZKVMVerifier", [TASK_ADDRESS]);
+
+  const address = await deployContract("ZKVMVerifier");
+  await deployContractWithProxy("ZKVM", [TASK_ADDRESS, address]);
 }
 
 async function main() {
