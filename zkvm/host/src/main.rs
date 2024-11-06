@@ -4,7 +4,8 @@ use methods::{
     COMPETITION_ELF, COMPETITION_ID
 };
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
-use sha2::{Sha256, Digest};
+use sha2::{Sha256, Digest as _};
+use risc0_zkvm::sha::{Digest, Digestible};
 
 fn main() {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -37,22 +38,38 @@ fn main() {
     // extract the receipt.
     let receipt = prove_info.receipt;
 
+    let proof = vec![0u8; 1];
+    // let proof = receipt.inner.groth16().unwrap().seal;
+
     // For example:
     let output: Vec<u8> = receipt.journal.decode().unwrap();
+    let output1: Digest = receipt.journal.digest();
+
+    let mut encode_hash = (hash.len() as u32).to_le_bytes().to_vec();
+    for i in hash.iter() {
+        encode_hash.extend((*i as u32).to_le_bytes().to_vec());
+    }
+    let mut hasher1 = Sha256::new();
+    hasher1.update(&encode_hash);
+    let hash1 = hasher1.finalize().to_vec();
+
+    let image_id: Digest = COMPETITION_ID.into();
 
     let mut id: Vec<u8> = vec![];
     for i in COMPETITION_ID {
         id.extend(i.to_le_bytes());
     }
 
-    println!("hash   : {}", hex::encode(&hash));
-    println!("output : {}", hex::encode(&output));
-    println!("id     : {}", hex::encode(&id));
+    println!("output  : {}", hex::encode(&hash));
+    println!("output  : {}", hex::encode(&output));
 
-    println!("half pi: {}", hex::encode(&output[..16]));
-    println!("half pi: {}", hex::encode(&output[16..]));
-    println!("half id: {}", hex::encode(&id[..16]));
-    println!("half id: {}", hex::encode(&id[16..]));
+    println!("digest : {}", hex::encode(&hash1));
+    println!("digest : {}", output1);
+
+    println!("id0     : {}", hex::encode(&id));
+    println!("id1     : {}", image_id);
+
+    println!("proof   : {}", hex::encode(&proof));
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
