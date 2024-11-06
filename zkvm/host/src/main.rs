@@ -39,7 +39,7 @@ fn main() {
     let receipt = prove_info.receipt;
 
     let proof = vec![0u8; 1];
-    // let proof = receipt.inner.groth16().unwrap().seal;
+    // let proof = &receipt.inner.groth16().unwrap().seal;
 
     // For example:
     let output: Vec<u8> = receipt.journal.decode().unwrap();
@@ -63,13 +63,13 @@ fn main() {
     println!("output  : {}", hex::encode(&hash));
     println!("output  : {}", hex::encode(&output));
 
-    println!("digest : {}", hex::encode(&hash1));
-    println!("digest : {}", output1);
+    println!("digest  : {}", hex::encode(&hash1));
+    println!("digest  : {}", output1);
 
     println!("id0     : {}", hex::encode(&id));
     println!("id1     : {}", image_id);
 
-    println!("proof   : {}", hex::encode(&proof));
+    println!("proof   : {}", hex::encode(proof));
 
     // The receipt was verified at the end of proving, but the below code is an
     // example of how someone else could verify this receipt.
