@@ -5,82 +5,99 @@ use methods::{
 };
 use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use sha2::{Sha256, Digest as _};
-use risc0_zkvm::sha::{Digest, Digestible};
+use sha3::Keccak256;
 
-fn main() {
-    // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
-    tracing_subscriber::fmt()
-        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
-        .init();
+/// INPUT=http://localhost:9098/tasks/1 cargo run --release
+#[tokio::main]
+async fn main() {
+    let input_path = std::env::var("INPUT").expect("env INPUT missing");
+    let bytes = reqwest::get(&input_path)
+        .await
+        .unwrap()
+        .bytes()
+        .await
+        .unwrap();
 
-    let now = std::time::Instant::now();
+    // parse inputs and publics
+    let mut input_len_bytes = [0u8; 4];
+    input_len_bytes.copy_from_slice(&bytes[0..4]);
+    let input_len = u32::from_be_bytes(input_len_bytes) as usize;
 
-    let input = [1u8; 32];
-    let mut hasher = Sha256::new();
-    hasher.update(&input);
-    let hash = hasher.finalize().to_vec();
+    let input = bytes[4..input_len + 4].to_vec();
+    let publics = bytes[input_len + 4..].to_vec();
 
+    // pre-check publics  // FIXME use risc-v runtime
+    let mut hasher1 = Sha256::new();
+    hasher1.update(&input);
+    let result1 = hasher1.finalize().to_vec();
+
+    let mut hasher2 = Keccak256::new();
+    hasher2.update(&result1);
+    let last = hasher2.finalize().to_vec();
+
+    // generate risc0 groth16 digest
+    let mut encode_hash = vec![32, 0, 0, 0]; // fixed 32 size
+    for i in last.iter() {
+        encode_hash.extend((*i as u32).to_le_bytes().to_vec());
+    }
+    let mut hasher3 = Sha256::new();
+    hasher3.update(&encode_hash);
+    let checked_publics = hasher3.finalize().to_vec();
+    assert_eq!(checked_publics, publics);
+
+    // start zkp
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
         .build()
         .unwrap();
 
-    // let prover = get_prover_server(&ProverOpts::succinct()).unwrap();
     let prover = get_prover_server(&ProverOpts::groth16()).unwrap();
-
-    // Proof information by proving the specified ELF binary.
-    // This struct contains the receipt along with statistics about execution of the guest
-    let prove_info = prover
-        .prove(env, COMPETITION_ELF)
-        .unwrap();
-
-    // extract the receipt.
+    let prove_info = prover.prove(env, COMPETITION_ELF).unwrap();
     let receipt = prove_info.receipt;
 
-    // let proof = vec![0u8; 1];
-
+    // serialize proof
     let g_proof = &receipt.inner.groth16().unwrap();
-    // selector
-    let mut proof = g_proof.verifier_parameters.as_bytes()[..4].to_vec();
-    // proof
+    let mut proof = g_proof.verifier_parameters.as_bytes()[..4].to_vec(); // selector
     proof.extend(&g_proof.seal);
 
-    // For example:
-    let output: Vec<u8> = receipt.journal.decode().unwrap();
-    let output1: Digest = receipt.journal.digest();
+    // check proof
+    receipt.verify(COMPETITION_ID).unwrap();
 
-    let mut encode_hash = (hash.len() as u32).to_le_bytes().to_vec();
-    for i in hash.iter() {
-        encode_hash.extend((*i as u32).to_le_bytes().to_vec());
+    let client = reqwest::Client::new();
+    client.post(&input_path).body(proof).send().await.unwrap();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use risc0_zkvm::sha::Digest;
+
+    #[test]
+    fn test_input_output() {
+        let image_id: Digest = COMPETITION_ID.into();
+
+        let input = [1u8; 32];
+
+        let mut hasher1 = Sha256::new();
+        hasher1.update(&input);
+        let result1 = hasher1.finalize().to_vec();
+
+        let mut hasher2 = Keccak256::new();
+        hasher2.update(&result1);
+        let last = hasher2.finalize().to_vec();
+
+        // generate risc0 groth16 digest
+        let mut encode_hash = vec![32, 0, 0, 0]; // fixed 32 size
+        for i in last.iter() {
+            encode_hash.extend((*i as u32).to_le_bytes().to_vec());
+        }
+        let mut hasher3 = Sha256::new();
+        hasher3.update(&encode_hash);
+        let publics = hasher3.finalize().to_vec();
+
+        println!("image  : {}", image_id);
+        println!("inputs : {}", hex::encode(input));
+        println!("publics: {}", hex::encode(publics));
     }
-    let mut hasher1 = Sha256::new();
-    hasher1.update(&encode_hash);
-    let hash1 = hasher1.finalize().to_vec();
-
-    let image_id: Digest = COMPETITION_ID.into();
-
-    let mut id: Vec<u8> = vec![];
-    for i in COMPETITION_ID {
-        id.extend(i.to_le_bytes());
-    }
-
-    println!("output  : {}", hex::encode(&hash));
-    println!("output  : {}", hex::encode(&output));
-
-    println!("digest  : {}", hex::encode(&hash1));
-    println!("digest  : {}", output1);
-
-    println!("id0     : {}", hex::encode(&id));
-    println!("id1     : {}", image_id);
-
-    println!("proof   : {}", hex::encode(proof));
-
-    // The receipt was verified at the end of proving, but the below code is an
-    // example of how someone else could verify this receipt.
-    receipt
-        .verify(COMPETITION_ID)
-        .unwrap();
-
-    println!("prove time: {}s", now.elapsed().as_secs());
 }
