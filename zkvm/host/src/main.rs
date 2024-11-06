@@ -26,8 +26,8 @@ fn main() {
         .build()
         .unwrap();
 
-    let prover = get_prover_server(&ProverOpts::succinct()).unwrap();
-    // let prover = get_prover_server(&ProverOpts::groth16()).unwrap();
+    // let prover = get_prover_server(&ProverOpts::succinct()).unwrap();
+    let prover = get_prover_server(&ProverOpts::groth16()).unwrap();
 
     // Proof information by proving the specified ELF binary.
     // This struct contains the receipt along with statistics about execution of the guest
@@ -38,8 +38,13 @@ fn main() {
     // extract the receipt.
     let receipt = prove_info.receipt;
 
-    let proof = vec![0u8; 1];
-    // let proof = &receipt.inner.groth16().unwrap().seal;
+    // let proof = vec![0u8; 1];
+
+    let g_proof = &receipt.inner.groth16().unwrap();
+    // selector
+    let mut proof = g_proof.verifier_parameters.as_bytes()[..4].to_vec();
+    // proof
+    proof.extend(&g_proof.seal);
 
     // For example:
     let output: Vec<u8> = receipt.journal.decode().unwrap();
