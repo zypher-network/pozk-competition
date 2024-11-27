@@ -128,7 +128,22 @@ mod test {
         println!("outputs(sha256_65) {}", output2);
 
         let input_hex = hex.trim_start_matches("0x");
-        let input_bytes = hex::decode(input_hex).expect("Unable to decode input file");
-        decode_prove_inputs(&input_bytes).expect("Unable to decode input");
+        let output1_hex = output1.trim_start_matches("0x");
+        let output2_hex = output2.trim_start_matches("0x");
+        let inputs_bytes = hex::decode(input_hex).expect("Unable to decode input file");
+        let publics1_bytes = hex::decode(output1_hex).expect("Unable to decode input file");
+        let publics2_bytes = hex::decode(output2_hex).expect("Unable to decode input file");
+        decode_prove_inputs(&inputs_bytes).expect("Unable to decode input");
+
+        std::fs::write("./test_miner_1", format!("{}\n{}", hex, output1)).unwrap();
+        std::fs::write("./test_miner_2", format!("{}\n{}", hex, output2)).unwrap();
+
+        let mut bytes1 = (inputs_bytes.len() as u32).to_be_bytes().to_vec();
+        bytes1.extend(inputs_bytes.clone());
+        let mut bytes2 = bytes1.clone();
+        bytes1.extend(publics1_bytes);
+        bytes2.extend(publics2_bytes);
+        std::fs::write("./test_inputs_1", bytes1).unwrap();
+        std::fs::write("./test_inputs_2", bytes2).unwrap();
     }
 }

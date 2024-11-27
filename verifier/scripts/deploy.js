@@ -8,7 +8,12 @@ const { ethers, upgrades, network } = require("hardhat");
 const { attachContract, sleep } = require("./address_utils.js");
 const { writeFile } = require('fs');
 
-const TASK_ADDRESS = "0xcc8240470F63D0b8055bf03f44D8817dAfCa0DB7";
+// Testnet (opbnbtestnet)
+const TASK_ADDRESS = "0x66e9CE70bb3431958e0CE352d1B5D85772E57E06";
+// Sha256Verifier address: 0x1248e1031c4d81a678c63811d7bf714b1a18220b
+// Sha25665Verifier address: 0x9b0b9bfcd3e1e3715bead7639d93b9c87a74b32a
+// ZKVMVerifier address: 0x765CDA9C22cC91F06292280207D18507905D5122
+// ZKVM address: 0x8dfff0d3ad663fde21fdddf11a7e981bdd311911
 
 async function deployContractWithProxy(name, params=[]) {
   const Factory = await ethers.getContractFactory(name);
@@ -36,6 +41,12 @@ async function deploy() {
 
   const address = await deployContract("ZKVMVerifier");
   await deployContractWithProxy("ZKVM", [TASK_ADDRESS, address]);
+}
+
+async function updateTask(name, address) {
+  const C = await ethers.getContractFactory(name);
+  return await C.attach(address);
+  await c.setTask(TASK_ADDRESS);
 }
 
 async function main() {
