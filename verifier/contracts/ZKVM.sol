@@ -9,7 +9,7 @@ import "./ITask.sol";
 contract ZKVM is Initializable, OwnableUpgradeable {
     address public verifier;
 
-    function initialize(address _task, address _verifier) public initializer {
+    function initialize(address _verifier) public initializer {
         __Ownable_init(msg.sender);
         verifier = _verifier;
     }

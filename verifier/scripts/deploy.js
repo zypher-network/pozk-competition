@@ -6,11 +6,22 @@
 // global scope, and execute the script.
 const { ethers, upgrades, network } = require("hardhat");
 
-// Testnet (opbnbtestnet)
-const SHA256_VERIFIER = "0x1248e1031c4d81a678c63811d7bf714b1a18220b";
-const SHA25665_VERIFIER = "0x9b0b9bfcd3e1e3715bead7639d93b9c87a74b32a";
-const ZKVM_VERIFIER = "0x765CDA9C22cC91F06292280207D18507905D5122";
-const ZKVM = "0x8dfff0d3ad663fde21fdddf11a7e981bdd311911";
+// Testnet
+const WALLET = "0x5ef51c9f449db7be2f0c636c6c137e65b8b96b9b";
+const AA_WALLET = "0x614421073bda3b8f63a1cbe920f0277e3951f4af";
+const SHA256_VERIFIER = "0x432D35F3717f195070C450F471311A221EF275Cd";
+const SHA25665_VERIFIER = "0xf227AB39cAB4D4fBfb70390a46831D060C271Dd5";
+const ZKVM_VERIFIER = "0x5e7ADcFE07BDAE740b0911eeb3849C795137B256";
+const ZKVM = "0x01aB8dB3B66900568C4420773C4517fD8bD6B1E3";
+
+// L2 Testnet
+// const AA_WALLET = "0x614421073bda3b8f63a1cbe920f0277e3951f4af";
+// const SHA256_VERIFIER = "0xA340ff9CaCf97862d27470a4793ff2c0221991e3";
+// const SHA25665_VERIFIER = "0x38841956Aa8459f864966E54484d15Dd4566471c";
+// const ZKVM_VERIFIER = "0x618b52f38F77810528Dc453e155325640Fc6B137";
+// const ZKVM = "0x6efDab245fb1905B3692C8E0C8702CEC13A17121";
+
+// Mainnet
 
 async function deployContractWithProxy(name, params=[]) {
   const Factory = await ethers.getContractFactory(name);
@@ -72,9 +83,10 @@ async function upgrade12() {
 }
 
 async function main() {
-  // await deploy();
-  // await allowlist("0xee20a1b9f86ed8263a4a4f6a6d9cbfdf2f88424d");
-  await upgrade12();
+  await deploy();
+  // await allowlist(WALLET);
+  // await allowlist(AA_WALLET);
+  // await upgrade12();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
