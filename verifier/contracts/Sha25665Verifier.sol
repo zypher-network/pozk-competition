@@ -137,8 +137,6 @@ contract Sha25665Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifie
 
     uint16 constant pLastMem = 896;
 
-    address public task;
-
     /// admin list for register account
     mapping(address => bool) public allowlist;
 
@@ -150,8 +148,8 @@ contract Sha25665Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifie
         return "Competition-2";
     }
 
-    function permission() external pure returns (bool) {
-        return true;
+    function permission(address sender) external view returns (bool) {
+        return allowlist[sender];
     }
 
     /// show how to serialize/deseriaze the inputs params
@@ -166,22 +164,12 @@ contract Sha25665Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifie
         return "bytes32";
     }
 
-    function initialize(address _task) public initializer {
+    function initialize() public initializer {
         __Ownable_init(msg.sender);
-        task = _task;
-    }
-
-    function setTask(address _task) external onlyOwner {
-        task = _task;
     }
 
     function allow(address account, bool _allow) external onlyOwner {
         allowlist[account] = _allow;
-    }
-
-    function create(bytes calldata inputs, bytes calldata publics) external {
-        require(allowlist[msg.sender], "P");
-        ITask(task).create(address(this), owner(), 0, inputs, publics);
     }
 
     struct Proof {
