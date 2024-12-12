@@ -7,43 +7,9 @@ use risc0_zkvm::{get_prover_server, ExecutorEnv, ProverOpts};
 use sha2::{Sha256, Digest as _};
 use sha3::Keccak256;
 
-/// INPUT=http://localhost:9098/tasks/1 cargo run --release
 #[tokio::main]
 async fn main() {
-    let input_path = std::env::var("INPUT").expect("env INPUT missing");
-    let bytes = reqwest::get(&input_path)
-        .await
-        .unwrap()
-        .bytes()
-        .await
-        .unwrap();
-
-    // parse inputs and publics
-    let mut input_len_bytes = [0u8; 4];
-    input_len_bytes.copy_from_slice(&bytes[0..4]);
-    let input_len = u32::from_be_bytes(input_len_bytes) as usize;
-
-    let input = bytes[4..input_len + 4].to_vec();
-    let publics = bytes[input_len + 4..].to_vec();
-
-    // pre-check publics  // FIXME use risc-v runtime
-    let mut hasher1 = Sha256::new();
-    hasher1.update(&input);
-    let result1 = hasher1.finalize().to_vec();
-
-    let mut hasher2 = Keccak256::new();
-    hasher2.update(&result1);
-    let last = hasher2.finalize().to_vec();
-
-    // generate risc0 groth16 digest
-    let mut encode_hash = vec![32, 0, 0, 0]; // fixed 32 size
-    for i in last.iter() {
-        encode_hash.extend((*i as u32).to_le_bytes().to_vec());
-    }
-    let mut hasher3 = Sha256::new();
-    hasher3.update(&encode_hash);
-    let checked_publics = hasher3.finalize().to_vec();
-    assert_eq!(checked_publics, publics);
+    let input = [0u8; 32]; // DEMO input
 
     // start zkp
     let env = ExecutorEnv::builder()
@@ -64,8 +30,7 @@ async fn main() {
     // check proof
     receipt.verify(COMPETITION_ID).unwrap();
 
-    let client = reqwest::Client::new();
-    client.post(&input_path).body(proof).send().await.unwrap();
+    println!("proof: {}", hex::encode(&proof));
 }
 
 #[cfg(test)]
