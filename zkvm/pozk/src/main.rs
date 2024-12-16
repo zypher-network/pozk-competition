@@ -3,14 +3,21 @@ use sha3::Keccak256;
 use serde_json::Value;
 use chrono::Utc;
 
-const COMPETITION_ELF: &[u8] = include_bytes!("../competition_elf");
+const COMPETITION_ELF_SP1: &[u8] = include_bytes!("../competition_elf_sp1");
+const COMPETITION_ELF_RISC0: &[u8] = include_bytes!("../competition_elf_risc0");
 
 /// INPUT=xx ZKVM=xx OVERTIME=xx cargo run --release
 #[tokio::main]
 async fn main() {
+    let zkvm = "risc0"; // sp1
+    let competition = COMPETITION_ELF_RISC0;
+
     let input_path = std::env::var("INPUT").expect("env INPUT missing");
     let zkvm_path = std::env::var("ZKVM").expect("env ZKVM missing");
     let overtime: i64 = std::env::var("OVERTIME").expect("env OVERTIME missing").parse().unwrap_or(0);
+    // let input = [0u8; 32];
+    // let zkvm_path = "http://54.187.128.172:9099";
+    // let overtime = Utc::now().timestamp() + 600;
 
     let bytes = reqwest::get(&input_path)
         .await
@@ -46,16 +53,16 @@ async fn main() {
     let checked_publics = hasher3.finalize().to_vec();
     assert_eq!(checked_publics, publics);
 
-    let elf_len = COMPETITION_ELF.len() as u32;
+    let elf_len = competition.len() as u32;
     let mut data = elf_len.to_be_bytes().to_vec();
-    data.extend(COMPETITION_ELF);
+    data.extend(competition);
     data.extend(input);
 
     // start zkp
     let now = std::time::Instant::now();
     let client = reqwest::Client::new();
     let res = client
-        .post(format!("{zkvm_path}/prove/risc0"))
+        .post(format!("{zkvm_path}/prove/{zkvm}"))
         .body(data)
         .send()
         .await
