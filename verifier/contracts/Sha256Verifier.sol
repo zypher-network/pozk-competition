@@ -164,6 +164,10 @@ contract Sha256Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifier 
         return "bytes32";
     }
 
+    function types() external pure returns (string memory) {
+        return "zk";
+    }
+
     function initialize() public initializer {
         __Ownable_init(msg.sender);
     }

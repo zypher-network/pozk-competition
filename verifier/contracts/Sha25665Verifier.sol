@@ -164,6 +164,10 @@ contract Sha25665Verifier is Initializable, OwnableUpgradeable, ERC165, IVerifie
         return "bytes32";
     }
 
+    function types() external pure returns (string memory) {
+        return "zk";
+    }
+
     function initialize() public initializer {
         __Ownable_init(msg.sender);
     }

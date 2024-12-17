@@ -39,6 +39,10 @@ contract ZKVMVerifier is ERC165, IVerifier, RiscZeroGroth16Verifier, Ownable {
         return "uint256[5]";
     }
 
+    function types() external pure returns (string memory) {
+        return "risc0";
+    }
+
     function allow(address account, bool _allow) external onlyOwner {
         allowlist[account] = _allow;
     }

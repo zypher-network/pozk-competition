@@ -83,10 +83,10 @@ async function upgrade12() {
 }
 
 async function main() {
-  await deploy();
+  // await deploy();
   // await allowlist(WALLET);
   // await allowlist(AA_WALLET);
-  // await upgrade12();
+  await upgrade12();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
