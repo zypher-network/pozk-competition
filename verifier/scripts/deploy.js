@@ -8,18 +8,18 @@ const { ethers, upgrades, network } = require("hardhat");
 
 // Testnet
 const WALLET = "0x5ef51c9f449db7be2f0c636c6c137e65b8b96b9b";
-const AA_WALLET = "0x614421073bda3b8f63a1cbe920f0277e3951f4af";
-const SHA256_VERIFIER = "0x432D35F3717f195070C450F471311A221EF275Cd";
-const SHA25665_VERIFIER = "0xf227AB39cAB4D4fBfb70390a46831D060C271Dd5";
-const ZKVM_VERIFIER = "0x5e7ADcFE07BDAE740b0911eeb3849C795137B256";
-const ZKVM = "0x01aB8dB3B66900568C4420773C4517fD8bD6B1E3";
-
-// L2 Testnet
 // const AA_WALLET = "0x614421073bda3b8f63a1cbe920f0277e3951f4af";
-// const SHA256_VERIFIER = "0xA340ff9CaCf97862d27470a4793ff2c0221991e3";
-// const SHA25665_VERIFIER = "0x38841956Aa8459f864966E54484d15Dd4566471c";
-// const ZKVM_VERIFIER = "0x618b52f38F77810528Dc453e155325640Fc6B137";
-// const ZKVM = "0x6efDab245fb1905B3692C8E0C8702CEC13A17121";
+// const SHA256_VERIFIER = "0x432D35F3717f195070C450F471311A221EF275Cd";
+// const SHA25665_VERIFIER = "0xf227AB39cAB4D4fBfb70390a46831D060C271Dd5";
+// const ZKVM_VERIFIER = "0x5e7ADcFE07BDAE740b0911eeb3849C795137B256";
+// const ZKVM = "0x01aB8dB3B66900568C4420773C4517fD8bD6B1E3";
+
+// Base Sepolia
+// const AA_WALLET = "0x614421073bda3b8f63a1cbe920f0277e3951f4af";
+const SHA256_VERIFIER = "0xA7B1Abf5B41D42C293917Cf8d8bDdf760b326d17";
+const SHA25665_VERIFIER = "0xf1A2812Fc68Ab4A8a7d08dea48DD941Db5174B6d";
+const ZKVM_VERIFIER = "0x74aB6bBB479Af79eAc347cA55A55afCd7438D318";
+const ZKVM = "0x8ab84F7C3b807e1fa4983972b97c191e51abcA84";
 
 // Mainnet
 
@@ -83,10 +83,10 @@ async function upgrade12() {
 }
 
 async function main() {
-  // await deploy();
+  await deploy();
   // await allowlist(WALLET);
   // await allowlist(AA_WALLET);
-  await upgrade12();
+  // await upgrade12();
 }
 
 // We recommend this pattern to be able to use async/await everywhere
